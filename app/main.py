@@ -24,7 +24,10 @@ def handle_commands(input: str, paths: list[str]):
     if input.startswith("echo"):
         args: str = input[5:]
         if not args.startswith("'"):
-            args = " ".join(args.split())
+            # print(
+            #     f"""yup I am inside that "'""  \n args: {args}  \n split: {args.split()}"""
+            # )
+            args = " ".join(args.split(" "))
 
         # print(args)
         # Why are we replacing "'" with "" ?
