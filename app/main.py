@@ -27,9 +27,19 @@ def handle_commands(input: str, paths: list[str]):
             # print(
             #     f"""yup I am inside that "'""  \n args: {args}  \n split: {args.split()}"""
             # )
-            args = " ".join(args.split(" "))
 
-        # print(args)
+            arg_list = []
+            quote_count = 0
+            for arg in args.split(" "):
+                quote_count += arg.count('"')
+
+                if quote_count % 2 == 0 and arg == "":
+                    continue
+                arg_list.append(arg)
+
+            args = " ".join(arg_list)
+
+        print(args)
         # Why are we replacing "'" with "" ?
         # It's because, if the user explicitly adds the "'" we need
         # to remove those in the final ouput becasue it doesn't look good
