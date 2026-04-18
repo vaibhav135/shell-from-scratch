@@ -39,7 +39,6 @@ def handle_commands(input: str, paths: list[str]):
 
             args = " ".join(arg_list)
 
-        print(args)
         # Why are we replacing "'" with "" ?
         # It's because, if the user explicitly adds the "'" we need
         # to remove those in the final ouput becasue it doesn't look good
