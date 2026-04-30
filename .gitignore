@@ -33,3 +33,8 @@ htmlcov/
 # Secrets / local config
 .env
 .env.local
+
+# Ignore temp folders
+temp/
+temp-*/
+temp_*/
