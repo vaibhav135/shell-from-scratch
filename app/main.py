@@ -1,6 +1,8 @@
 import os
 import sys
 import subprocess
+from .tokenizer import tokenize
+
 
 builtin_commands = ("type", "echo", "exit", "pwd", "cd")
 
@@ -23,27 +25,12 @@ def in_path(command: str, paths: list[str]) -> tuple[str, bool]:
 def handle_commands(input: str, paths: list[str]):
     if input.startswith("echo"):
         args: str = input[5:]
-        if not args.startswith("'"):
-            # print(
-            #     f"""yup I am inside that "'""  \n args: {args}  \n split: {args.split()}"""
-            # )
 
-            arg_list = []
-            quote_count = 0
-            for arg in args.split(" "):
-                quote_count += arg.count('"')
+        token_str = ""
+        tokens = tokenize(args)
+        token_str = " ".join(tokens)
 
-                if quote_count % 2 == 0 and arg == "":
-                    continue
-                arg_list.append(arg)
-
-            args = " ".join(arg_list)
-
-        # Why are we replacing "'" with "" ?
-        # It's because, if the user explicitly adds the "'" we need
-        # to remove those in the final ouput becasue it doesn't look good
-        print(args.replace('"', "").strip())
-        # print(args, file=sys.stderr)
+        print(token_str)
     elif input.startswith("pwd"):
         args: str = input[4:]
         print(os.getcwd())
@@ -84,7 +71,9 @@ def main():
 
                 handle_commands(user_inp, paths)
             elif user_inp.startswith("cat"):
-                command = [s for arg in user_inp.split("'") if (s := arg.strip())]
+                command = tokenize(user_inp)
+                # command.insert(0, "cat")
+                # print(command)
                 subprocess.run(command)
             else:
                 command = user_inp.split(" ")
