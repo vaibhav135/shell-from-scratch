@@ -10,6 +10,20 @@ class State(Enum):
 
 
 def tokenize(line: str) -> list[str]:
+    """
+    tokenize iterates over the line (char by char) and returns the final lexemes
+
+
+    Concept:
+    Tokenizers/lexer does two things scanning and evaluation / classification
+    scanning - literally go through all the characters and fill up our lexeme
+                ofcourse there will be some delimiter to break it into multiple
+                lexeme. Basically we are creating multiple subsequeneces
+
+    evaluation/classification - Once we get our lexemes we are basically classifying them
+                                into categories like identifier, literal, keyword etc.
+
+    """
     line = line.strip()
 
     if len(line) <= 0:
