@@ -1,13 +1,14 @@
 from enum import Enum, auto
 
 from .custom_exceptions import QuoteException
+from .utils import has_backslash
 
 
 class State(Enum):
     DEFAULT = auto()
     IN_SINGLE_QUOTE = auto()
     IN_DOUBLE_QUOTE = auto()
-    IN_BACKSLASH_QUOTES = auto()
+    IN_BACKSLASH = auto()
 
 
 def tokenize(line: str) -> list[str]:
@@ -35,6 +36,7 @@ def tokenize(line: str) -> list[str]:
 
     state = State.DEFAULT
     quote_ended = False
+    prev_state: State | None = None
 
     for char in line:
         match state:
@@ -43,8 +45,8 @@ def tokenize(line: str) -> list[str]:
                     state = State.IN_SINGLE_QUOTE
                 elif char == '"':
                     state = State.IN_DOUBLE_QUOTE
-                elif char == r"\ "[0]:  # Only read the backslash
-                    state = State.IN_BACKSLASH_QUOTES
+                elif has_backslash(char):  # Only read the backslash
+                    state = State.IN_BACKSLASH
                 elif char == " ":
                     if not lexeme and not quote_ended:
                         continue
@@ -64,12 +66,18 @@ def tokenize(line: str) -> list[str]:
                 if char == '"':
                     state = State.DEFAULT
                     quote_ended = True
+                elif has_backslash(char):  # Only read the backslash
+                    state = State.IN_BACKSLASH
+                    prev_state = State.IN_DOUBLE_QUOTE
                 else:
                     lexeme += char
-            case State.IN_BACKSLASH_QUOTES:
-                state = State.DEFAULT
+            case State.IN_BACKSLASH:
                 lexeme += char
-
+                if prev_state:
+                    state = prev_state
+                    prev_state = None
+                else:
+                    state = State.DEFAULT
     if state != State.DEFAULT:
         raise QuoteException("quotes are not closed properly")
 
