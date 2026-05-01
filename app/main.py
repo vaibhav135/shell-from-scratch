@@ -72,16 +72,15 @@ def main():
                 handle_commands(user_inp, paths)
             elif user_inp.startswith("cat"):
                 command = tokenize(user_inp)
-                # command.insert(0, "cat")
-                # print(command)
                 subprocess.run(command)
             else:
-                command = user_inp.split(" ")
-                fullpath, path_exist = in_path(command[0], paths)
-                if not path_exist:
-                    print(f"{user_inp}: command not found")
+                # Subprocess takes care of executables and os level binaries
+                executable = tokenize(user_inp)
+                fullpath, path_exist = in_path(executable[0], paths)
+                if path_exist:
+                    subprocess.run(executable)
                 else:
-                    subprocess.run(command)
+                    print(f"{user_inp}: command not found")
 
         except KeyboardInterrupt:
             return

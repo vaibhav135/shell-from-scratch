@@ -45,7 +45,7 @@ def tokenize(line: str) -> list[str]:
                     state = State.IN_SINGLE_QUOTE
                 elif char == '"':
                     state = State.IN_DOUBLE_QUOTE
-                elif has_backslash(char):  # Only read the backslash
+                elif has_backslash(char):
                     state = State.IN_BACKSLASH
                 elif char == " ":
                     if not lexeme and not quote_ended:
@@ -66,7 +66,8 @@ def tokenize(line: str) -> list[str]:
                 if char == '"':
                     state = State.DEFAULT
                     quote_ended = True
-                elif has_backslash(char):  # Only read the backslash
+                elif has_backslash(char):
+                    # Only escape backslash in double quote and no quote case
                     state = State.IN_BACKSLASH
                     prev_state = State.IN_DOUBLE_QUOTE
                 else:
