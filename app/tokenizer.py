@@ -7,6 +7,7 @@ class State(Enum):
     DEFAULT = auto()
     IN_SINGLE_QUOTE = auto()
     IN_DOUBLE_QUOTE = auto()
+    IN_BACKSLASH_QUOTES = auto()
 
 
 def tokenize(line: str) -> list[str]:
@@ -42,6 +43,8 @@ def tokenize(line: str) -> list[str]:
                     state = State.IN_SINGLE_QUOTE
                 elif char == '"':
                     state = State.IN_DOUBLE_QUOTE
+                elif char == r"\ "[0]:  # Only read the backslash
+                    state = State.IN_BACKSLASH_QUOTES
                 elif char == " ":
                     if not lexeme and not quote_ended:
                         continue
@@ -63,6 +66,9 @@ def tokenize(line: str) -> list[str]:
                     quote_ended = True
                 else:
                     lexeme += char
+            case State.IN_BACKSLASH_QUOTES:
+                state = State.DEFAULT
+                lexeme += char
 
     if state != State.DEFAULT:
         raise QuoteException("quotes are not closed properly")
