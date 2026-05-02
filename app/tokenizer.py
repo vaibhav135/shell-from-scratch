@@ -47,6 +47,13 @@ def tokenize(line: str) -> list[str]:
                     state = State.IN_DOUBLE_QUOTE
                 elif has_backslash(char):
                     state = State.IN_BACKSLASH
+                elif char == ">":
+                    # Ignore any digit before stdin
+                    if not lexeme.isdigit():
+                        lexemes.append(lexeme)
+
+                    lexemes.append(char)
+                    lexeme = ""
                 elif char == " ":
                     if not lexeme and not quote_ended:
                         continue
@@ -79,6 +86,7 @@ def tokenize(line: str) -> list[str]:
                     prev_state = None
                 else:
                     state = State.DEFAULT
+
     if state != State.DEFAULT:
         raise QuoteException("quotes are not closed properly")
 
