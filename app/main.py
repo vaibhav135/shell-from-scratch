@@ -2,24 +2,16 @@ import os
 import sys
 import subprocess
 from .tokenizer import tokenize
+from .utils import in_path
 
 
 builtin_commands = ("type", "echo", "exit", "pwd", "cd")
+shell_operator = (">", ">>", "<", "2>", "&>")
 
 
-def path_exists(path: str) -> bool:
-    if os.access(path, os.X_OK):
-        return True
-    return False
-
-
-def in_path(command: str, paths: list[str]) -> tuple[str, bool]:
-    for path in paths:
-        fullpath = os.path.join(path, command)
-        if path_exists(fullpath):
-            return fullpath, True
-
-    return "", False
+def write_to_file(content: str, filename: str):
+    with open(filename, "w+") as file:
+        file.write(content + "\n")
 
 
 def handle_commands(input: str, paths: list[str]):
@@ -28,9 +20,23 @@ def handle_commands(input: str, paths: list[str]):
 
         token_str = ""
         tokens = tokenize(args)
-        token_str = " ".join(tokens)
 
-        print(token_str)
+        if ">" in tokens:
+            delimit_idx = tokens.index(">")
+            filename = tokens[delimit_idx + 1]
+            content = " ".join(
+                [
+                    token
+                    for token in tokens[0:delimit_idx]
+                    if isinstance(token, str) and not token.isdigit()
+                ]
+            ).strip()
+            # print(f"filename: {filename} \ncontent: {content}")
+            write_to_file(content, filename)
+
+        else:
+            token_str = " ".join(tokens)
+            print(token_str)
     elif input.startswith("pwd"):
         args: str = input[4:]
         print(os.getcwd())
@@ -70,14 +76,19 @@ def main():
                     break
 
                 handle_commands(user_inp, paths)
-            elif user_inp.startswith("cat"):
-                command = tokenize(user_inp)
-                subprocess.run(command)
             else:
                 # Subprocess takes care of executables and os level binaries
                 executable = tokenize(user_inp)
                 fullpath, path_exist = in_path(executable[0], paths)
-                if path_exist:
+
+                found_shell_operator = any(
+                    operator in executable for operator in shell_operator
+                )
+
+                if found_shell_operator:
+                    # Let the shell handle, stdout, stdin operator
+                    subprocess.run(" ".join(executable), shell=True)
+                elif path_exist:
                     subprocess.run(executable)
                 else:
                     print(f"{user_inp}: command not found")
