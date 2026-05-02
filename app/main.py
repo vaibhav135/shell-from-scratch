@@ -1,17 +1,14 @@
+# POSIX standard specification for shell
+#  - https://pubs.opengroup.org/onlinepubs/9799919799/
+
 import os
 import sys
 import subprocess
+
+from app.redirection import redirect
 from .tokenizer import tokenize
 from .utils import in_path
-
-
-builtin_commands = ("type", "echo", "exit", "pwd", "cd")
-shell_operator = (">", ">>", "<", "2>", "&>")
-
-
-def write_to_file(content: str, filename: str):
-    with open(filename, "w+") as file:
-        file.write(content + "\n")
+from .constant import builtin_commands, operators
 
 
 def handle_commands(input: str, paths: list[str]):
@@ -21,19 +18,10 @@ def handle_commands(input: str, paths: list[str]):
         token_str = ""
         tokens = tokenize(args)
 
-        if ">" in tokens:
-            delimit_idx = tokens.index(">")
-            filename = tokens[delimit_idx + 1]
-            content = " ".join(
-                [
-                    token
-                    for token in tokens[0:delimit_idx]
-                    if isinstance(token, str) and not token.isdigit()
-                ]
-            ).strip()
-            # print(f"filename: {filename} \ncontent: {content}")
-            write_to_file(content, filename)
+        operator_found = [token in operators for token in tokens]
 
+        if True in operator_found:
+            redirect(tokens, operator_found)
         else:
             token_str = " ".join(tokens)
             print(token_str)
@@ -82,7 +70,7 @@ def main():
                 fullpath, path_exist = in_path(executable[0], paths)
 
                 found_shell_operator = any(
-                    operator in executable for operator in shell_operator
+                    operator in executable for operator in operators
                 )
 
                 if found_shell_operator:
