@@ -8,5 +8,6 @@ In Unix
     Std error is identified by 2 hence 2>
     
 """
-operators = (">", "1>", "2>")
+redirect_operators = (">", "1>", "2>")
+append_operators = (">>", "1>>")
 # shell_operator = (">", ">>", "<", "1>", "2>", "&>")
