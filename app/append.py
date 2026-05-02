@@ -3,11 +3,11 @@ def stdin(content: str, filename: str):
         file.write(content + "\n")
 
 
-# def stdout(content: str, filename: str):
-#     with open(filename, "w+") as file:
-#         file.write("")
-#
-#     print(content)
+def stderr(content: str, filename: str):
+    with open(filename, "a+") as file:
+        file.write("")
+
+    print(content)
 
 
 def append(input: list[str], operator_found: list[bool]):
@@ -19,3 +19,5 @@ def append(input: list[str], operator_found: list[bool]):
     match input[operator_idx]:
         case ">>" | "1>>":
             stdin(content, filename)
+        case "2>>":
+            stderr(content, filename)
