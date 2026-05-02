@@ -3,7 +3,7 @@ def stdin(content: str, filename: str):
         file.write(content + "\n")
 
 
-def stdout(content: str, filename: str):
+def stderr(content: str, filename: str):
     with open(filename, "w+") as file:
         file.write("")
 
@@ -20,4 +20,4 @@ def redirect(input: list[str], operator_found: list[bool]):
         case ">" | "1>":
             stdin(content, filename)
         case "2>":
-            stdout(content, filename)
+            stderr(content, filename)
