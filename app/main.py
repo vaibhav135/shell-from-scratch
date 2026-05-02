@@ -5,10 +5,11 @@ import os
 import sys
 import subprocess
 
+from app.append import append
 from app.redirection import redirect
 from .tokenizer import tokenize
 from .utils import in_path
-from .constant import builtin_commands, operators
+from .constant import builtin_commands, redirect_operators, append_operators
 
 
 def handle_commands(input: str, paths: list[str]):
@@ -18,10 +19,13 @@ def handle_commands(input: str, paths: list[str]):
         token_str = ""
         tokens = tokenize(args)
 
-        operator_found = [token in operators for token in tokens]
+        redirect_operator_found = [token in redirect_operators for token in tokens]
+        append_operator_found = [token in append_operators for token in tokens]
 
-        if True in operator_found:
-            redirect(tokens, operator_found)
+        if True in redirect_operator_found:
+            redirect(tokens, redirect_operator_found)
+        elif True in append_operator_found:
+            append(tokens, append_operator_found)
         else:
             token_str = " ".join(tokens)
             print(token_str)
@@ -68,6 +72,7 @@ def main():
                 # Subprocess takes care of executables and os level binaries
                 executable = tokenize(user_inp)
                 fullpath, path_exist = in_path(executable[0], paths)
+                operators = redirect_operators + append_operators
 
                 found_shell_operator = any(
                     operator in executable for operator in operators
