@@ -1,14 +1,16 @@
 # POSIX standard specification for shell
 #  - https://pubs.opengroup.org/onlinepubs/9799919799/
-
 import os
-import sys
+
+# import sys
 import subprocess
+import readline
 
 from app.append import append
 from app.redirection import redirect
 from .tokenizer import tokenize
 from .utils import in_path
+from .completer import outer_completer
 from .constant import builtin_commands, redirect_operators, append_operators
 
 
@@ -56,12 +58,20 @@ def handle_commands(input: str, paths: list[str]):
 
 
 def main():
+    # mac os uses libedit not GNU readline
+    autocomplete_cmd_bind = (
+        "bind ^I rl_complete" if readline.backend == "editline" else "tab: complete"
+    )
+
+    readline.parse_and_bind(autocomplete_cmd_bind)
+    readline.set_completer(outer_completer())
+
     paths = os.environ["PATH"].split(os.pathsep)
 
     while True:
         try:
-            sys.stdout.write("$ ")
-            user_inp = input()
+            # sys.stdout.write("$ ")
+            user_inp = input("$ ")
 
             if user_inp.startswith(builtin_commands):
                 if user_inp == "exit":
