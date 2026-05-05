@@ -6,55 +6,22 @@ import os
 import subprocess
 import readline
 
-from app.append import append
-from app.redirection import redirect
 from .tokenizer import tokenize
 from .utils import in_path
 from .completer import outer_completer
 from .constant import builtin_commands, redirect_operators, append_operators
+from .commands import handle_echo, handle_type, handle_cd
 
 
 def handle_commands(input: str, paths: list[str]):
     if input.startswith("echo"):
-        args: str = input[5:]
-
-        token_str = ""
-        tokens = tokenize(args)
-
-        redirect_operator_found = [token in redirect_operators for token in tokens]
-        append_operator_found = [token in append_operators for token in tokens]
-
-        if True in redirect_operator_found:
-            redirect(tokens, redirect_operator_found)
-        elif True in append_operator_found:
-            append(tokens, append_operator_found)
-        else:
-            token_str = " ".join(tokens)
-            print(token_str)
+        handle_echo(input, paths)
     elif input.startswith("pwd"):
-        args: str = input[4:]
         print(os.getcwd())
     elif input.startswith("cd"):
-        args: str = input[3:]
-        homedir = os.getenv("HOME")
-        dir = homedir if args == "~" and homedir else args
-
-        if os.path.exists(dir):
-            os.chdir(dir)
-        else:
-            print(f"cd: {args}: No such file or directory")
+        handle_cd(input, paths)
     elif input.startswith("type"):
-        string_after = input[5:]
-
-        if string_after in builtin_commands:
-            print(f"{string_after} is a shell builtin")
-        else:
-            fullpath, path_exist = in_path(string_after, paths)
-
-            if path_exist:
-                print(f"{string_after} is {fullpath}")
-            else:
-                print(f"{string_after}: not found")
+        handle_type(input, paths)
 
 
 def main():
