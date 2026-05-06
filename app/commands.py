@@ -24,7 +24,7 @@ def handle_echo(input: str, paths: list[str]):
         append(tokens, append_operator_found)
     else:
         token_str = " ".join(tokens)
-    print(token_str)
+        print(token_str)
 
 
 def handle_type(input: str, paths: list[str]):
