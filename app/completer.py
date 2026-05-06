@@ -12,6 +12,8 @@ def outer_completer():
                 possibilities = [
                     txt + " " for txt in builtin_commands if txt.startswith(text)
                 ]
+                if len(possibilities) == 0:
+                    possibilities.append(text)
 
             if state > len(possibilities):
                 return None
