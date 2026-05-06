@@ -1,3 +1,6 @@
+import os
+
+
 builtin_commands = ("type", "echo", "exit", "pwd", "cd")
 
 """
@@ -10,3 +13,6 @@ In Unix
 """
 redirect_operators = (">", "1>", "2>")
 append_operators = (">>", "1>>", "2>>")
+
+
+external_paths = os.environ["PATH"].split(os.pathsep)
