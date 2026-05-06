@@ -9,7 +9,12 @@ import readline
 from .tokenizer import tokenize
 from .utils import in_path
 from .completer import outer_completer
-from .constant import builtin_commands, redirect_operators, append_operators
+from .constant import (
+    builtin_commands,
+    redirect_operators,
+    append_operators,
+    external_paths as paths,
+)
 from .commands import handle_echo, handle_type, handle_cd
 
 
@@ -33,11 +38,8 @@ def main():
     readline.parse_and_bind(autocomplete_cmd_bind)
     readline.set_completer(outer_completer())
 
-    paths = os.environ["PATH"].split(os.pathsep)
-
     while True:
         try:
-            # sys.stdout.write("$ ")
             user_inp = input("$ ")
 
             if user_inp.startswith(builtin_commands):
