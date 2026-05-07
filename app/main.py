@@ -9,7 +9,7 @@ import readline
 
 from .tokenizer import tokenize
 from .utils import in_path
-from .completer import outer_completer, pre_input_hook
+from .completer import outer_completer
 from .constant import (
     builtin_commands,
     redirect_operators,
@@ -37,7 +37,6 @@ def main():
     )
 
     readline.parse_and_bind(autocomplete_cmd_bind)
-    readline.set_pre_input_hook(pre_input_hook)
     readline.set_completer(outer_completer())
 
     while True:
