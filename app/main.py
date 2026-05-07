@@ -9,7 +9,7 @@ import readline
 
 from .tokenizer import tokenize
 from .utils import in_path
-from .completer import outer_completer
+from .completer import CompletionType, outer_completer
 from .constant import (
     builtin_commands,
     redirect_operators,
