@@ -1,11 +1,5 @@
 import os
 
-# extra = (
-#     "xyz_dog",
-#     "xyz_dog_bee",
-#     "xyz_dog_bee_cow",
-# )
-
 
 builtin_commands = ("type", "echo", "exit", "pwd", "cd")
 
