@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 
 def has_backslash(char: str) -> bool:
@@ -21,3 +22,13 @@ def in_path(command: str, paths: list[str]) -> tuple[str, bool]:
             return fullpath, True
 
     return "", False
+
+
+def files_in_dir(dir: Path) -> list[str]:
+    dir_files = []
+
+    for file in dir.iterdir():
+        if file.is_file():
+            dir_files.append(file.name)
+
+    return dir_files
