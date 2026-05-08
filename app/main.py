@@ -9,7 +9,6 @@ import readline
 
 from .tokenizer import tokenize
 from .utils import in_path
-from .completer import CompletionType, outer_completer
 from .constant import (
     builtin_commands,
     redirect_operators,
@@ -17,6 +16,7 @@ from .constant import (
     external_paths as paths,
 )
 from .commands import handle_echo, handle_type, handle_cd
+from app.completer.completer import outer_completer
 
 
 def handle_commands(input: str, paths: list[str]):
