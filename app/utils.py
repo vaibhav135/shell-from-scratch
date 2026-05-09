@@ -24,7 +24,18 @@ def in_path(command: str, paths: list[str]) -> tuple[str, bool]:
     return "", False
 
 
-def files_in_dir(dir: Path) -> list[str]:
+def get_file_and_dir(path: Path) -> list[str]:
+    match = []
+    for item in path.iterdir():
+        if item.is_dir():
+            match.append(item.name + "/")
+        else:
+            match.append(item.name)
+
+    return match
+
+
+def get_files(dir: Path) -> list[str]:
     dir_files = []
 
     for file in dir.iterdir():
@@ -32,3 +43,12 @@ def files_in_dir(dir: Path) -> list[str]:
             dir_files.append(file.name)
 
     return dir_files
+
+
+def get_dir(path: Path) -> list[str]:
+    dir = []
+    for d in path.iterdir():
+        if d.is_dir():
+            dir.append(d.name + "/")
+
+    return dir
