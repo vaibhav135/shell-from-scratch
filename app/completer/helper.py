@@ -75,6 +75,7 @@ def get_matches(
     command: list[str], text: str, completion_type: CompletionType
 ) -> list[str]:
     args = ""
+
     if len(command) > 1:
         args = command[1]
 
@@ -82,13 +83,13 @@ def get_matches(
 
     find_exact_matches = True
 
-    if command and (command[-1] == "/" or len(command) > 1):
+    if args and args[-1] == "/":
         find_exact_matches = False
 
     if find_exact_matches:
         matches = sorted(
             [
-                txt + " "
+                txt + " " if txt[-1] != "/" else txt
                 for txt in completion_list
                 if txt.startswith(text if text else args) and txt != text
             ]

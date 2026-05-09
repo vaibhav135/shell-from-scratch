@@ -32,8 +32,7 @@ def outer_completer():
         try:
             if state == 0:
                 if len(matches) > 0 and not is_new_text:
-                    if len(command) == 1:
-                        """
+                    """
                         This is handling the second tab press. I have to manually print all the
                         values, otherwise the default string fortmatting won't pass codecrafters
                         tests
@@ -47,16 +46,16 @@ def outer_completer():
                             am stuck with this kind of hacky solutions.
 
                         """
-                        print()
-                        match_string = " ".join(matches)
-                        print(f"{match_string}")
-                        print(f"$ {text}")
+                    print()
+                    match_string = " ".join(matches)
+                    print(f"{match_string}")
+                    print(f"$ {line_buffer}", end="")
 
-                        # Reset the nonlocal variables
-                        matches = []
-                        prev_text = ""
+                    # Reset the nonlocal variables
+                    matches = []
+                    prev_text = ""
 
-                        return None
+                    return None
                 else:
                     if text:
                         prev_text = text
@@ -65,7 +64,7 @@ def outer_completer():
                         prev_text = command[-1]
                     matches = get_matches(command, text, completion_type)
 
-            if state > len(matches) or len(matches) == 0:
+            if state >= len(matches) or len(matches) == 0:
                 return None
 
             if len(command) > 1 and command[1] and not text:
