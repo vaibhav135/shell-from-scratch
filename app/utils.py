@@ -52,3 +52,8 @@ def get_dir(path: Path) -> list[str]:
             dir.append(d.name + "/")
 
     return dir
+
+
+def is_background_job(input: str) -> bool:
+    input = input.strip()
+    return input[-1] == "&"
