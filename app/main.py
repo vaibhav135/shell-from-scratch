@@ -8,7 +8,7 @@ import readline
 
 
 from .tokenizer import tokenize
-from .utils import in_path
+from .utils import in_path, is_background_job
 from .constant import (
     builtin_commands,
     redirect_operators,
@@ -41,6 +41,8 @@ def main():
     readline.parse_and_bind(autocomplete_cmd_bind)
     readline.set_completer(outer_completer())
 
+    jobid = 0
+
     while True:
         try:
             user_inp = input("$ ")
@@ -50,6 +52,12 @@ def main():
                     break
 
                 handle_commands(user_inp, paths)
+            elif is_background_job(user_inp):
+                args = user_inp.split(" ")
+                args.remove("&")
+                proc = subprocess.Popen(args)
+                jobid += 1
+                print(f"[{jobid}] {proc.pid}")
             else:
                 # Subprocess takes care of executables and os level binaries
                 executable = tokenize(user_inp)
