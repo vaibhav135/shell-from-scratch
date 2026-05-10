@@ -61,9 +61,15 @@ def handle_jobs(_: str):
     if not bg_job.count:
         return
     else:
-        spaces = " ".join(["" for _ in range(0, 17)])
-        for job in bg_job.joblist:
-            print(f"[{job['count']}]{job['marker']}  Running {spaces}{job['command']}")
+        for idx, job in enumerate(bg_job.joblist):
+            spaces = " ".join(
+                ["" for _ in range(0, 24 - (len(job["status"].name) - 1))]
+            )
+            status = bg_job.update_job_status(idx)
+            print(
+                f"[{job['count']}]{job['marker']}  {status.name}{spaces}{job['command']}"
+            )
+        bg_job.clean()
 
 
 def handle_commands(input: str):
