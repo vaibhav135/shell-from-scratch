@@ -13,7 +13,7 @@ from .constant import (
     append_operators,
     external_paths,
 )
-from .commands import handle_commands
+from .commands import handle_commands, handle_jobs
 from app.completer.completer import outer_completer
 from .jobs import bg_job
 
@@ -30,14 +30,17 @@ def main():
     while True:
         try:
             user_inp = input("$ ")
+            args = user_inp.split(" ")
 
             if user_inp.startswith(builtin_commands):
                 if user_inp == "exit":
                     break
 
                 handle_commands(user_inp)
+
+                if user_inp != "jobs":
+                    handle_jobs(auto_reaping=True)
             elif is_background_job(user_inp):
-                args = user_inp.split(" ")
                 args.remove("&")
                 proc = subprocess.Popen(args)
                 proc.returncode
