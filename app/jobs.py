@@ -5,7 +5,13 @@ class BackgroundJob:
 
     def add_job(self, pid: int, command: str):
         self.count += 1
-        self.joblist.append({"pid": pid, "count": self.count, "command": command})
+
+        for job in self.joblist:
+            job["marker"] = "-" if len(self.joblist) == job["count"] else " "
+
+        self.joblist.append(
+            {"pid": pid, "count": self.count, "command": command, "marker": "+"}
+        )
 
     def get_job(self):
         return self.joblist
