@@ -40,8 +40,9 @@ def main():
                 args = user_inp.split(" ")
                 args.remove("&")
                 proc = subprocess.Popen(args)
+                proc.returncode
 
-                bg_job.add_job(pid=proc.pid, command=user_inp)
+                bg_job.add_job(proc=proc, pid=proc.pid, command=user_inp)
                 print(f"[{bg_job.count}] {proc.pid}")
             else:
                 # Subprocess takes care of executables and os level binaries
