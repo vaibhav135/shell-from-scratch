@@ -1,33 +1,21 @@
 # POSIX standard specification for shell
 #  - https://pubs.opengroup.org/onlinepubs/9799919799/
-import os
 
-# import sys
 import subprocess
 import readline
 
 
 from .tokenizer import tokenize
-from .utils import in_path
+from .utils import in_path, is_background_job
 from .constant import (
     builtin_commands,
     redirect_operators,
     append_operators,
-    external_paths as paths,
+    external_paths,
 )
-from .commands import handle_echo, handle_type, handle_cd
+from .commands import handle_commands, handle_jobs
 from app.completer.completer import outer_completer
-
-
-def handle_commands(input: str, paths: list[str]):
-    if input.startswith("echo"):
-        handle_echo(input, paths)
-    elif input.startswith("pwd"):
-        print(os.getcwd())
-    elif input.startswith("cd"):
-        handle_cd(input, paths)
-    elif input.startswith("type"):
-        handle_type(input, paths)
+from .jobs import bg_job
 
 
 def main():
@@ -42,16 +30,27 @@ def main():
     while True:
         try:
             user_inp = input("$ ")
+            args = user_inp.split(" ")
 
             if user_inp.startswith(builtin_commands):
                 if user_inp == "exit":
                     break
 
-                handle_commands(user_inp, paths)
+                handle_commands(user_inp)
+
+                if user_inp != "jobs":
+                    handle_jobs(auto_reaping=True)
+            elif is_background_job(user_inp):
+                args.remove("&")
+                proc = subprocess.Popen(args)
+                proc.returncode
+
+                bg_job.add_job(proc=proc, pid=proc.pid, command=user_inp)
+                print(f"[{bg_job.count}] {proc.pid}")
             else:
                 # Subprocess takes care of executables and os level binaries
                 executable = tokenize(user_inp)
-                fullpath, path_exist = in_path(executable[0], paths)
+                fullpath, path_exist = in_path(executable[0], external_paths)
                 operators = redirect_operators + append_operators
 
                 found_shell_operator = any(
