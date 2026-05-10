@@ -63,7 +63,7 @@ def handle_jobs(_: str):
     else:
         spaces = " ".join(["" for _ in range(0, 17)])
         for job in bg_job.joblist:
-            print(f"[{job['count']}]+  Running {spaces}{job['command']}")
+            print(f"[{job['count']}]{job['marker']}  Running {spaces}{job['command']}")
 
 
 def handle_commands(input: str):
