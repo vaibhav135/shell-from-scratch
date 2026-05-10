@@ -1,6 +1,7 @@
 import os
 
 from app.append import append
+from app.enum import BackgroundJobStatus
 from app.redirection import redirect
 from .tokenizer import tokenize
 
@@ -57,7 +58,13 @@ def handle_cd(input: str):
         print(f"cd: {args}: No such file or directory")
 
 
-def handle_jobs(_: str):
+def handle_jobs(auto_reaping=False):
+    """
+    Args:
+    auto_reaping: bool
+        auto-reaping is a fancy term for calling this function after each command execution
+        to check if the any of the job is done. So that we can clean it up.
+    """
     if not bg_job.count:
         return
     else:
@@ -66,9 +73,16 @@ def handle_jobs(_: str):
                 ["" for _ in range(0, 24 - (len(job["status"].name) - 1))]
             )
             status = bg_job.update_job_status(idx)
-            print(
-                f"[{job['count']}]{job['marker']}  {status.name}{spaces}{job['command']}"
-            )
+
+            if auto_reaping:
+                if status == BackgroundJobStatus.Done:
+                    print(
+                        f"[{job['count']}]{job['marker']}  {status.name}{spaces}{job['command']}"
+                    )
+            else:
+                print(
+                    f"[{job['count']}]{job['marker']}  {status.name}{spaces}{job['command']}"
+                )
 
         bg_job.clean()
 
@@ -81,6 +95,6 @@ def handle_commands(input: str):
     elif input.startswith("cd"):
         handle_cd(input)
     elif input.startswith("jobs"):
-        handle_jobs(input)
+        handle_jobs()
     elif input.startswith("type"):
         handle_type(input)
