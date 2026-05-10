@@ -69,6 +69,7 @@ def handle_jobs(_: str):
             print(
                 f"[{job['count']}]{job['marker']}  {status.name}{spaces}{job['command']}"
             )
+
         bg_job.clean()
 
 
