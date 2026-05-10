@@ -26,6 +26,8 @@ def handle_commands(input: str, paths: list[str]):
         print(os.getcwd())
     elif input.startswith("cd"):
         handle_cd(input, paths)
+    elif input.startswith("jobs"):
+        return
     elif input.startswith("type"):
         handle_type(input, paths)
 
