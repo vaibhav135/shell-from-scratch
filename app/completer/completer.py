@@ -18,8 +18,6 @@ def outer_completer():
         line_buffer = readline.get_line_buffer()
         command = line_buffer.split(" ")
 
-        completion_type = get_completion_type(line_buffer)
-
         is_new_text = (
             True if (prev_text or count) and prev_text != command[-1] else False
         )
@@ -62,6 +60,8 @@ def outer_completer():
                     else:
                         count += 1
                         prev_text = command[-1]
+
+                    completion_type = get_completion_type(line_buffer)
                     matches = get_matches(command, text, completion_type)
 
             if state >= len(matches) or len(matches) == 0:
