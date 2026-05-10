@@ -1,5 +1,5 @@
 from subprocess import Popen
-from typing import TypedDict, is_typeddict
+from typing import TypedDict
 from app.enum import BackgroundJobStatus
 
 
@@ -16,6 +16,7 @@ class BackgroundJob:
     def __init__(self):
         self.joblist: list[Job] = []
         self.count = 0
+        self.terminated_job_count_list: list[int] = []
 
     def _recompute_markers(self):
         itr_count = 0
@@ -30,7 +31,21 @@ class BackgroundJob:
             itr_count += 1
 
     def add_job(self, proc: Popen[bytes], pid: int, command: str):
-        self.count += 1
+        """
+        Recycling job indexes:
+            whenever adding a new job, always looks for the smallest
+            available job index
+        """
+        recycle_job_index = len(self.terminated_job_count_list) > 0
+        smallest_job_count = -1
+
+        if not recycle_job_index:
+            self.count += 1
+        else:
+            smallest_job_count = self.terminated_job_count_list[0]
+            self.terminated_job_count_list.remove(smallest_job_count)
+
+        count = smallest_job_count if recycle_job_index else self.count
 
         for job in self.joblist:
             job["marker"] = "-" if len(self.joblist) == job["count"] else " "
@@ -38,7 +53,7 @@ class BackgroundJob:
         self.joblist.append(
             {
                 "pid": pid,
-                "count": self.count,
+                "count": count,
                 "command": command,
                 "marker": "+",
                 "status": BackgroundJobStatus.Running,
@@ -66,9 +81,18 @@ class BackgroundJob:
         return job["status"]
 
     def clean(self):
-        self.joblist = [
-            job for job in self.joblist if job["status"] == BackgroundJobStatus.Running
-        ]
+        joblist = []
+
+        for job in self.joblist:
+            joblist.append(job) if job[
+                "status"
+            ] == BackgroundJobStatus.Running else self.terminated_job_count_list.append(
+                job["count"]
+            )
+
+        self.terminated_job_count_list.sort()
+        self.joblist = joblist
+
         self._recompute_markers()
 
 
