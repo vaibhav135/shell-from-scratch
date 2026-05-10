@@ -2,9 +2,9 @@ from pathlib import Path
 
 from app.constant import builtin_commands
 from app.external_executables import external_exec_list
-from app.utils import get_file_and_dir, get_dir
+from app.utils import get_file_and_dir
 
-from .enum import CompletionType, CommandType
+from .enum import CompletionType
 
 
 def is_nested_file(path: str) -> bool:
@@ -17,41 +17,19 @@ def is_nested_file(path: str) -> bool:
     return Path(dir_path).is_dir() and path_idx + 1 < len(path)
 
 
-def is_dir(path: str) -> bool:
-    """
-    We are basically check here if we find '/' in the end
-    of the path string, if we do meaning it's a dir. Second
-    we check if it's legit one by using is_dir and check if
-    it exist in our current working directory.
-    """
-    path_idx = path.rfind("/")
-
-    if path_idx == -1:
-        dir = get_dir(Path.cwd())
-        return any([path in d for d in dir])
-
-    dir_path = path[: path_idx + 1]
-    return Path(dir_path).is_dir() and path_idx + 1 == len(path)
-
-
 def get_completion_type(line_buffer: str) -> CompletionType:
     completion_type = CompletionType.CommandCompletion
     input = line_buffer.split(" ")
 
     if input.__len__() > 1:
-        command = input[0]
-        path = input[1]
+        path = input[-1]
+        path_idx = path.rfind("/")
+        is_dir = path_idx > -1
 
-        command_type = CommandType.get_command_type(command)
-
-        if command_type == CommandType.BothFileAndDir:
-            completion_type = CompletionType.BothDirAndFileCompletion
-        elif is_nested_file(path):
-            completion_type = CompletionType.NestedFileCompletion
-        elif is_dir(path):
-            completion_type = CompletionType.DirectoryCompletion
+        if is_dir:
+            completion_type = CompletionType.NestedDirCompletion
         else:
-            completion_type = CompletionType.FileCompletion
+            completion_type = CompletionType.CurDirCompletion
 
     return completion_type
 
@@ -62,7 +40,7 @@ def get_completion_list(text: str, completion_type: CompletionType) -> list[str]
 
     if completion_type == CompletionType.CommandCompletion:
         completion_list = list(builtin_commands) + external_exec_list
-    elif path_idx > -1:
+    elif completion_type == CompletionType.NestedDirCompletion:
         path = text[: path_idx + 1]
         completion_list = get_file_and_dir(Path(path))
     else:
