@@ -84,12 +84,13 @@ def main():
                     print(f"[{bg_job.count}] {proc.pid}")
                 elif piped_commands:
                     proc_cache = handle_piping(
-                        arg, proc_cache, prev_cmd_ouput, is_last_idx
+                        arg_list, proc_cache, prev_cmd_ouput, is_last_idx
                     )
                     if proc_cache and is_last_idx:
                         stdout, _ = proc_cache.communicate()
                         if stdout:
                             print(stdout, end="")
+
                 else:
                     # Subprocess takes care of executables and os level binaries
                     executable = tokenize(arg)

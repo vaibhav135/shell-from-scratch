@@ -2,20 +2,34 @@ import subprocess
 
 
 def handle_piping(
-    arg: str,
+    cmd: list[str],
     proc_cache: subprocess.Popen[str] | None,
     prev_cmd_ouput: str,
     is_last_idx: bool,
 ) -> subprocess.Popen[str]:
-    cmd = arg.strip().split(" ")
-    if proc_cache is None and not prev_cmd_ouput:
-        proc_cache = subprocess.Popen(cmd, stdout=subprocess.PIPE, encoding="utf-8")
-    elif proc_cache:
+    cmd = [c.replace('"', "") for c in cmd]
+
+    if not proc_cache and not is_last_idx:
         proc_cache = subprocess.Popen(
             cmd,
-            stdin=proc_cache.stdout,
+            stdout=subprocess.PIPE,
             encoding="utf-8",
         )
+    elif proc_cache:
+        if is_last_idx:
+            proc_cache = subprocess.Popen(
+                cmd,
+                stdin=proc_cache.stdout,
+                encoding="utf-8",
+            )
+
+        else:
+            proc_cache = subprocess.Popen(
+                cmd,
+                stdin=proc_cache.stdout,
+                stdout=subprocess.PIPE,
+                encoding="utf-8",
+            )
     else:
         proc_cache = subprocess.Popen(
             cmd,
@@ -23,7 +37,7 @@ def handle_piping(
             encoding="utf-8",
         )
 
-        if proc_cache.stdin:
+        if prev_cmd_ouput and proc_cache.stdin:
             proc_cache.stdin.write(prev_cmd_ouput + "\n")
             proc_cache.stdin.flush()
 
