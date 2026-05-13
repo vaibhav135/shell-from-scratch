@@ -4,6 +4,8 @@
 import subprocess
 import readline
 
+from app.pipe import handle_piping
+
 
 from .tokenizer import tokenize
 from .utils import in_path, is_background_job
@@ -28,66 +30,86 @@ def main():
     readline.set_completer(outer_completer())
 
     while True:
+        """
+        Two types of command
+            echo 'hello world'
+
+            echo 'hello wold' | wc
+
+            user_inp  - 2 types
+            if user_inp has | (pipes)
+            if they have pipe we split it by "|"
+            else we put it in 
+            
+
+        """
         try:
             user_inp = input("$ ")
-            piped_commands = "|" in user_inp
 
-            delim = "|" if piped_commands else " "
+            args = user_inp.split("|")
 
-            args = user_inp.split(delim)
+            # It basically stores the output of the last command used when
+            # the input contains a pipe
+            proc_cache: subprocess.Popen[str] | None = None
+            prev_cmd_ouput = ""
 
-            if user_inp.startswith(builtin_commands):
-                if user_inp == "exit":
-                    break
+            piped_commands = len(args) > 1
 
-                handle_commands(user_inp)
+            if "exit" in args:
+                break
 
-                if user_inp != "jobs":
-                    handle_jobs(auto_reaping=True)
-            elif is_background_job(user_inp):
-                args.remove("&")
-                proc = subprocess.Popen(args)
-                proc.returncode
+            for index, arg in enumerate(args):
+                arg = arg.strip()
+                arg_list = arg.split(" ")
+                is_last_idx = (index + 1) == len(args)
 
-                bg_job.add_job(proc=proc, pid=proc.pid, command=user_inp)
-                print(f"[{bg_job.count}] {proc.pid}")
-            elif piped_commands:
-                proc_cache = None
-                for arg in args:
-                    cmd = arg.strip().split(" ")
-                    if proc_cache is None:
-                        proc_cache = subprocess.Popen(
-                            cmd, stdout=subprocess.PIPE, encoding="utf-8"
-                        )
-                    else:
-                        proc_cache = subprocess.Popen(
-                            cmd,
-                            stdin=proc_cache.stdout,
-                            encoding="utf-8",
-                        )
+                if arg.startswith(builtin_commands):
+                    prev_cmd_ouput = handle_commands(arg)
+                    if (
+                        prev_cmd_ouput
+                        and (not piped_commands or (piped_commands and is_last_idx))
+                        and arg.startswith(("echo", "type"))
+                    ):
+                        print(prev_cmd_ouput)
 
-                if proc_cache:
-                    stdout, _ = proc_cache.communicate()
-                    if stdout:
-                        print(stdout, end="")
+                    if arg != "jobs":
+                        handle_jobs(auto_reaping=True)
 
-            else:
-                # Subprocess takes care of executables and os level binaries
-                executable = tokenize(user_inp)
-                fullpath, path_exist = in_path(executable[0], external_paths)
-                operators = redirect_operators + append_operators
+                elif is_background_job(arg):
+                    arg_list.remove("&")
+                    proc = subprocess.Popen(arg_list)
+                    proc.returncode
 
-                found_shell_operator = any(
-                    operator in executable for operator in operators
-                )
-
-                if found_shell_operator:
-                    # Let the shell handle, stdout, stdin operator
-                    subprocess.run(" ".join(executable), shell=True)
-                elif path_exist:
-                    subprocess.run(executable)
+                    bg_job.add_job(proc=proc, pid=proc.pid, command=arg)
+                    print(f"[{bg_job.count}] {proc.pid}")
+                elif piped_commands:
+                    proc_cache = handle_piping(
+                        arg, proc_cache, prev_cmd_ouput, is_last_idx
+                    )
+                    if proc_cache and is_last_idx:
+                        stdout, _ = proc_cache.communicate()
+                        if stdout:
+                            print(stdout, end="")
                 else:
-                    print(f"{user_inp}: command not found")
+                    # Subprocess takes care of executables and os level binaries
+                    executable = tokenize(arg)
+                    fullpath, path_exist = in_path(executable[0], external_paths)
+                    operators = redirect_operators + append_operators
+
+                    found_shell_operator = any(
+                        operator in executable for operator in operators
+                    )
+
+                    if found_shell_operator:
+                        # Let the shell handle, stdout, stdin operator
+                        subprocess.run(" ".join(executable), shell=True)
+                    elif path_exist:
+                        subprocess.run(executable)
+                    else:
+                        print(f"{arg}: command not found")
+
+            proc_cache = None
+            prev_cmd_ouput = ""
 
         except KeyboardInterrupt:
             return
