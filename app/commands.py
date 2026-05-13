@@ -15,36 +15,43 @@ from .constant import (
 from .jobs import bg_job
 
 
-def handle_echo(input: str):
+def handle_echo(input: str) -> str:
     args: str = input[5:]
 
     token_str = ""
     tokens = tokenize(args)
+    output = ""
 
     redirect_operator_found = [token in redirect_operators for token in tokens]
     append_operator_found = [token in append_operators for token in tokens]
 
     if True in redirect_operator_found:
-        redirect(tokens, redirect_operator_found)
+        output = redirect(tokens, redirect_operator_found)
     elif True in append_operator_found:
-        append(tokens, append_operator_found)
+        output = append(tokens, append_operator_found)
     else:
         token_str = " ".join(tokens)
-        print(token_str)
+        output = token_str
+
+    output = f"{output if {output} else ''}"
+    return output
 
 
-def handle_type(input: str):
+def handle_type(input: str) -> str:
     string_after = input[5:]
+    output = ""
 
     if string_after in builtin_commands:
-        print(f"{string_after} is a shell builtin")
+        output = f"{string_after} is a shell builtin"
     else:
         fullpath, path_exist = in_path(string_after, external_paths)
 
         if path_exist:
-            print(f"{string_after} is {fullpath}")
+            output = f"{string_after} is {fullpath}"
         else:
-            print(f"{string_after}: not found")
+            output = f"{string_after}: not found"
+
+    return output
 
 
 def handle_cd(input: str):
@@ -87,9 +94,11 @@ def handle_jobs(auto_reaping=False):
         bg_job.clean()
 
 
-def handle_commands(input: str):
+def handle_commands(input: str) -> str:
+    output = ""
+
     if input.startswith("echo"):
-        handle_echo(input)
+        output = handle_echo(input)
     elif input.startswith("pwd"):
         print(os.getcwd())
     elif input.startswith("cd"):
@@ -97,4 +106,6 @@ def handle_commands(input: str):
     elif input.startswith("jobs"):
         handle_jobs()
     elif input.startswith("type"):
-        handle_type(input)
+        output = handle_type(input)
+
+    return output
