@@ -30,7 +30,11 @@ def main():
     while True:
         try:
             user_inp = input("$ ")
-            args = user_inp.split(" ")
+            piped_commands = "|" in user_inp
+
+            delim = "|" if piped_commands else " "
+
+            args = user_inp.split(delim)
 
             if user_inp.startswith(builtin_commands):
                 if user_inp == "exit":
@@ -47,6 +51,26 @@ def main():
 
                 bg_job.add_job(proc=proc, pid=proc.pid, command=user_inp)
                 print(f"[{bg_job.count}] {proc.pid}")
+            elif piped_commands:
+                proc_cache = None
+                for arg in args:
+                    cmd = arg.strip().split(" ")
+                    if proc_cache is None:
+                        proc_cache = subprocess.Popen(
+                            cmd, stdout=subprocess.PIPE, encoding="utf-8"
+                        )
+                    else:
+                        proc_cache = subprocess.Popen(
+                            cmd,
+                            stdin=proc_cache.stdout,
+                            encoding="utf-8",
+                        )
+
+                if proc_cache:
+                    stdout, _ = proc_cache.communicate()
+                    if stdout:
+                        print(stdout, end="")
+
             else:
                 # Subprocess takes care of executables and os level binaries
                 executable = tokenize(user_inp)
