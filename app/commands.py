@@ -99,7 +99,10 @@ def handle_history(input: str):
     input_list = input.split(" ")
 
     if "-r" in input_list:
-        cmd_hist.append_file(input_list[-1])
+        cmd_hist.append_from_file(input_list[-1])
+        return
+    elif "-w" in input_list:
+        cmd_hist.append_to_file(input_list[-1])
         return
 
     n = int(input_list[-1].strip()) if len(input_list) > 1 else -1
