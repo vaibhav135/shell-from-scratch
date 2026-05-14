@@ -13,6 +13,7 @@ from .constant import (
     external_paths,
 )
 from .jobs import bg_job
+from .history import cmd_hist
 
 
 def handle_echo(input: str) -> str:
@@ -94,6 +95,30 @@ def handle_jobs(auto_reaping=False):
         bg_job.clean()
 
 
+def handle_history(input: str):
+    input_list = input.split(" ")
+
+    if "-r" in input_list:
+        cmd_hist.append_from_file(input_list[-1])
+        return
+    elif any("-w" == li or "-a" == li for li in input_list):
+        cmd_hist.append_to_file(input_list[-1], "-a" in input_list)
+        return
+
+    n = int(input_list[-1].strip()) if len(input_list) > 1 else -1
+
+    hist = cmd_hist.get_all()
+    idx = 0
+
+    if n > 0:
+        idx = (len(hist) - n) + 1
+        hist = cmd_hist.get_lastn(n)
+
+    for cmd in hist:
+        print(f"\t{idx} {cmd}")
+        idx += 1
+
+
 def handle_commands(input: str) -> str:
     output = ""
 
@@ -107,5 +132,7 @@ def handle_commands(input: str) -> str:
         handle_jobs()
     elif input.startswith("type"):
         output = handle_type(input)
+    elif input.startswith("history"):
+        handle_history(input)
 
     return output
