@@ -60,7 +60,7 @@ def main():
             if "exit" in args:
                 history_filepath = cmd_hist.history_filepath
                 if history_filepath:
-                    cmd_hist.append_to_file(history_filepath)
+                    cmd_hist.append_to_histfile(history_filepath)
 
                 break
 
@@ -121,7 +121,7 @@ def main():
         except KeyboardInterrupt:
             history_filepath = cmd_hist.history_filepath
             if history_filepath:
-                cmd_hist.append_to_file(history_filepath)
+                cmd_hist.append_to_histfile(history_filepath)
             return
 
 
