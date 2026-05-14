@@ -119,6 +119,20 @@ def handle_history(input: str):
         idx += 1
 
 
+def handle_complete(input: str):
+    input_list = input.split(" ")
+
+    if "-p" in input_list:
+        found = False
+        for hist in cmd_hist.get_all():
+            if "complete" in hist and "-a" in hist:
+                print(hist)
+                found = True
+                break
+        if not found:
+            print(f"complete: {input_list[-1]}: no completion specification")
+
+
 def handle_commands(input: str) -> str:
     output = ""
 
@@ -134,5 +148,7 @@ def handle_commands(input: str) -> str:
         output = handle_type(input)
     elif input.startswith("history"):
         handle_history(input)
+    elif input.startswith("complete"):
+        handle_complete(input)
 
     return output
