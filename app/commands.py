@@ -95,9 +95,20 @@ def handle_jobs(auto_reaping=False):
         bg_job.clean()
 
 
-def handle_history():
-    for idx, cmd in enumerate(cmd_hist.get_list()):
+def handle_history(input: str):
+    input_list = input.split(" ")
+    n = int(input_list[-1].strip()) if len(input_list) > 1 else -1
+
+    hist = cmd_hist.get_all()
+    idx = 0
+
+    if n > 0:
+        idx = (len(hist) - n) + 1
+        hist = cmd_hist.get_lastn(n)
+
+    for cmd in hist:
         print(f"\t{idx} {cmd}")
+        idx += 1
 
 
 def handle_commands(input: str) -> str:
@@ -114,6 +125,6 @@ def handle_commands(input: str) -> str:
     elif input.startswith("type"):
         output = handle_type(input)
     elif input.startswith("history"):
-        handle_history()
+        handle_history(input)
 
     return output
