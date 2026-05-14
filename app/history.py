@@ -1,6 +1,7 @@
 class CmdHistory:
     def __init__(self):
         self.history = []
+        self.history_append_idx = 0
 
     def append(self, cmd: str):
         self.history.append(cmd)
@@ -19,10 +20,16 @@ class CmdHistory:
             for line in lines:
                 self.history.append(line.strip("\n"))
 
-    def append_to_file(self, filepath: str):
+    def append_to_file(self, filepath: str, is_append_mode: bool = False):
+        history = self.history
+
+        if is_append_mode:
+            history = self.history[self.history_append_idx :]
+
         with open(filepath, "a") as file:
-            for hist in self.history:
-                file.write(hist + "\n")
+            for cmd in history:
+                self.history_append_idx += 1
+                file.write(cmd + "\n")
 
 
 cmd_hist = CmdHistory()

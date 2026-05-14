@@ -101,8 +101,8 @@ def handle_history(input: str):
     if "-r" in input_list:
         cmd_hist.append_from_file(input_list[-1])
         return
-    elif "-w" in input_list:
-        cmd_hist.append_to_file(input_list[-1])
+    elif any("-w" == li or "-a" == li for li in input_list):
+        cmd_hist.append_to_file(input_list[-1], "-a" in input_list)
         return
 
     n = int(input_list[-1].strip()) if len(input_list) > 1 else -1
