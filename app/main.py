@@ -58,6 +58,10 @@ def main():
             piped_commands = len(args) > 1
 
             if "exit" in args:
+                history_filepath = cmd_hist.history_filepath
+                if history_filepath:
+                    cmd_hist.append_to_file(history_filepath)
+
                 break
 
             for index, arg in enumerate(args):
@@ -115,6 +119,9 @@ def main():
             prev_cmd_ouput = ""
 
         except KeyboardInterrupt:
+            history_filepath = cmd_hist.history_filepath
+            if history_filepath:
+                cmd_hist.append_to_file(history_filepath)
             return
 
 

@@ -1,7 +1,15 @@
+import os
+
+
 class CmdHistory:
     def __init__(self):
         self.history = []
         self.history_append_idx = 0
+
+        self.history_filepath = os.getenv("HISTFILE", "")
+
+        if self.history_filepath:
+            self.append_from_file(self.history_filepath)
 
     def append(self, cmd: str):
         self.history.append(cmd)
