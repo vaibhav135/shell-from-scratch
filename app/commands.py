@@ -13,6 +13,7 @@ from .constant import (
     external_paths,
 )
 from .jobs import bg_job
+from .history import cmd_hist
 
 
 def handle_echo(input: str) -> str:
@@ -94,6 +95,11 @@ def handle_jobs(auto_reaping=False):
         bg_job.clean()
 
 
+def handle_history():
+    for idx, cmd in enumerate(cmd_hist.get_list()):
+        print(f"\t{idx} {cmd}")
+
+
 def handle_commands(input: str) -> str:
     output = ""
 
@@ -107,5 +113,7 @@ def handle_commands(input: str) -> str:
         handle_jobs()
     elif input.startswith("type"):
         output = handle_type(input)
+    elif input.startswith("history"):
+        handle_history()
 
     return output

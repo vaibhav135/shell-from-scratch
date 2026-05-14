@@ -17,6 +17,7 @@ from .constant import (
 )
 from .commands import handle_commands, handle_jobs
 from app.completer.completer import outer_completer
+from .history import cmd_hist
 from .jobs import bg_job
 
 
@@ -45,6 +46,7 @@ def main():
         """
         try:
             user_inp = input("$ ")
+            cmd_hist.append(user_inp)
 
             args = user_inp.split("|")
 
