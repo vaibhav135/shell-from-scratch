@@ -1,7 +1,7 @@
 import os
 
 
-builtin_commands = ("type", "echo", "exit", "pwd", "cd", "jobs")
+builtin_commands = ("type", "echo", "exit", "pwd", "cd", "jobs", "history")
 
 """
 Shell Operators
