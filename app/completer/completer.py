@@ -28,7 +28,7 @@ class Completer:
         if ".py" in filepath:
             exec = ["python3", filepath]
 
-        if len(args) == 3:
+        if len(args) > 0:
             exec.extend(args)
 
         result = subprocess.run(exec, capture_output=True, text=True)
@@ -38,7 +38,9 @@ class Completer:
             # self.custom_completer[cmd] = [result.stdout.strip() + " "]
             # completer_candidates = self.custom_completer.get(cmd)
 
-            completer_candidates = [result.stdout.strip() + " "]
+            completer_candidates = [
+                output.strip() + " " for output in result.stdout.split("\n") if output
+            ]
 
         return completer_candidates
 
@@ -109,6 +111,9 @@ class Completer:
 
                         if len(command) == 3:
                             args = [command[0], command[-1], command[1]]
+                        elif len(command) == 2:
+                            args = [command[0], command[-1], command[0]]
+
                         self.matches = self.get_custom_completer_candidates(
                             command[0].strip(), args
                         )
