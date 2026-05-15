@@ -35,9 +35,6 @@ class Completer:
         completer_candidates = []
 
         if result.stdout:
-            # self.custom_completer[cmd] = [result.stdout.strip() + " "]
-            # completer_candidates = self.custom_completer.get(cmd)
-
             completer_candidates = [
                 output.strip() + " " for output in result.stdout.split("\n") if output
             ]
