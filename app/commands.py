@@ -143,7 +143,12 @@ def handle_declare(input: str):
     input_list = [inp.strip() for inp in input.split(" ") if inp]
 
     if "=" in input_list[-1]:
-        declare_var.add_var_declaration(input_list[-1].strip())
+        is_valid = declare_var.validate_declaration(input_list[-1].strip())
+
+        if is_valid:
+            declare_var.add_var_declaration(input_list[-1].strip())
+        else:
+            print(f"declare: `{input_list[-1]}': not a valid identifier")
     elif "-p" in input_list:
         dec_str = declare_var.get_var_declaration(input_list[-1].strip())
         if dec_str:

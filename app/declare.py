@@ -13,5 +13,16 @@ class DeclareVariable:
             return f'{dec_key}="{dec_val}"'
         return ""
 
+    def validate_declaration(self, declaration: str) -> bool:
+        declaration_list = declaration.split("=")
+        if len(declaration_list) > 0:
+            dec_key = declaration_list[0]
+            if dec_key[0].isnumeric():
+                return False
+            if not all(ch.isalpha() or ch.isdigit() or ch == "_" for ch in dec_key):
+                return False
+
+        return True
+
 
 declare_var = DeclareVariable()
