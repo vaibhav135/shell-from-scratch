@@ -142,7 +142,7 @@ def handle_complete(input: str):
 def handle_declare(input: str):
     input_list = [inp.strip() for inp in input.split(" ") if inp]
 
-    if "=" in input_list:
+    if "=" in input_list[-1]:
         declare_var.add_var_declaration(input_list[-1].strip())
     elif "-p" in input_list:
         dec_str = declare_var.get_var_declaration(input_list[-1].strip())
