@@ -15,6 +15,7 @@ from .constant import (
 from .jobs import bg_job
 from .history import cmd_hist
 from app.completer.completer import run_completer as completer
+from app.declare import declare_var
 
 
 def handle_echo(input: str) -> str:
@@ -141,8 +142,14 @@ def handle_complete(input: str):
 def handle_declare(input: str):
     input_list = [inp.strip() for inp in input.split(" ") if inp]
 
-    if "-p" in input_list:
-        print(f"{input_list[0]} -- {input_list[-1]}")
+    if "=" in input_list:
+        declare_var.add_var_declaration(input_list[-1].strip())
+    elif "-p" in input_list:
+        dec_str = declare_var.get_var_declaration(input_list[-1].strip())
+        if dec_str:
+            print(f"declare -- {dec_str}")
+        else:
+            print(f"declare: {input_list[-1].strip()}: not found")
 
 
 def handle_commands(input: str) -> str:
