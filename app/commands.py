@@ -15,6 +15,7 @@ from .constant import (
 from .jobs import bg_job
 from .history import cmd_hist
 from app.completer.completer import run_completer as completer
+from app.declare import declare_var
 
 
 def handle_echo(input: str) -> str:
@@ -23,6 +24,13 @@ def handle_echo(input: str) -> str:
     token_str = ""
     tokens = tokenize(args)
     output = ""
+
+    if "$" in input:
+        vars = declare_var.extract_values(input)
+
+        if len(vars) > 0:
+            output = " ".join(vars)
+        return output
 
     redirect_operator_found = [token in redirect_operators for token in tokens]
     append_operator_found = [token in append_operators for token in tokens]
@@ -138,6 +146,24 @@ def handle_complete(input: str):
         completer.remove_custom_completion_filepath(cmd)
 
 
+def handle_declare(input: str):
+    input_list = [inp.strip() for inp in input.split(" ") if inp]
+
+    if "=" in input_list[-1]:
+        is_valid = declare_var.validate_declaration(input_list[-1].strip())
+
+        if is_valid:
+            declare_var.add_var_declaration(input_list[-1].strip())
+        else:
+            print(f"declare: `{input_list[-1]}': not a valid identifier")
+    elif "-p" in input_list:
+        dec_str = declare_var.get_var_declaration(input_list[-1].strip())
+        if dec_str:
+            print(f"declare -- {dec_str}")
+        else:
+            print(f"declare: {input_list[-1].strip()}: not found")
+
+
 def handle_commands(input: str) -> str:
 
     output = ""
@@ -156,5 +182,7 @@ def handle_commands(input: str) -> str:
         handle_history(input)
     elif input.startswith("complete"):
         handle_complete(input)
+    elif input.startswith("declare"):
+        handle_declare(input)
 
     return output
