@@ -1,35 +1,57 @@
 import readline
+import subprocess
 
 
 from .helper import get_completion_type, get_matches
 
 
-def outer_completer():
-    matches = []
-    prev_text = ""
-    count = 0
+class Completer:
+    def __init__(self):
+        self.initialize()
+        # list of tuple (command, filepath)
+        self.custom_completer_filepath: list[tuple] = []
+        self.custom_completer = {}  # store list of completion candidates {"docker": ["run", "compose"] ...}
 
-    # Text will be empty if it contains any of these delimiters  `~!@#$%^&*()-=+[{]}\|;:'",<>/?
-    def completer(text: str, state: int) -> str | None:
-        nonlocal matches
-        nonlocal prev_text
-        nonlocal count
+    def initialize(self):
+        self.matches = []
+        self.prev_text = ""
+        self.count = 0
+
+    def add_custom_completer_file_path(self, cmd: str, filepath: str):
+        self.custom_completer_filepath.append((cmd, filepath))
+
+        exec = [filepath]
+
+        if ".py" in filepath:
+            exec = ["python3", filepath]
+
+        result = subprocess.run(exec, capture_output=True, text=True)
+        if result.stdout:
+            self.custom_completer[cmd] = [result.stdout.strip() + " "]
+
+    def get_custom_completer_candidates(self, cmd: str) -> list[str]:
+        completer_candidates = self.custom_completer.get(cmd)
+        return completer_candidates if completer_candidates else []
+
+    # Text will be empty or missing till, if it contains any of these delimiters  `~!@#$%^&*()-=+[{]}\|;:'",<>/?
+    def completer(self, text: str, state: int) -> str | None:
 
         line_buffer = readline.get_line_buffer()
         command = line_buffer.split(" ")
 
         is_new_text = (
-            True if (prev_text or count) and prev_text != command[-1] else False
+            True
+            if (self.prev_text or self.count) and self.prev_text != command[-1]
+            else False
         )
 
         if is_new_text:
-            matches = []
-            prev_text = ""
-            count = 0
+            # re-initialize or resetting here
+            self.initialize()
 
         try:
             if state == 0:
-                if len(matches) > 0 and not is_new_text:
+                if len(self.matches) > 0 and not is_new_text:
                     """
                         This is handling the second tab press. I have to manually print all the
                         values, otherwise the default string fortmatting won't pass codecrafters
@@ -45,31 +67,39 @@ def outer_completer():
 
                         """
                     print()
-                    match_string = " ".join(matches)
+                    match_string = " ".join(self.matches)
                     print(f"{match_string}")
                     print(f"$ {line_buffer}", end="")
 
                     # Reset the nonlocal variables
-                    matches = []
-                    prev_text = ""
+                    self.matches = []
+                    self.prev_text = ""
 
                     return None
                 else:
                     if text:
-                        prev_text = text
+                        self.prev_text = text
                     else:
-                        count += 1
-                        prev_text = command[-1]
+                        self.count += 1
+                        self.prev_text = command[-1]
 
-                    completion_type = get_completion_type(line_buffer)
-                    matches = get_matches(command, text, completion_type)
+                    if any(
+                        command[0].strip() == custom_completion_cmd
+                        for custom_completion_cmd in self.custom_completer.keys()
+                    ):
+                        self.matches = self.get_custom_completer_candidates(
+                            command[0].strip()
+                        )
+                    else:
+                        completion_type = get_completion_type(line_buffer)
+                        self.matches = get_matches(command, text, completion_type)
 
-            if state >= len(matches) or len(matches) == 0:
+            if state >= len(self.matches) or len(self.matches) == 0:
                 return None
 
             if len(command) > 1 and command[1] and not text:
                 """
-                    This handles the specific case of a text where dilimiter will be there at the end of the text.
+                    This handles the specific case of a text where delimiter will be there at the end of the text.
                     
                     for example:
                         du hello-
@@ -85,13 +115,14 @@ def outer_completer():
 
                 """
                 delimit = command[1][-1]
-                delimit_idx = matches[state].rfind(delimit)
-                match = matches[state][delimit_idx + 1 :]
+                delimit_idx = self.matches[state].rfind(delimit)
+                match = self.matches[state][delimit_idx + 1 :]
                 if delimit_idx > -1 and match:
                     return match
 
-            return matches[state]
+            return self.matches[state]
         except IndexError:
             return None
 
-    return completer
+
+run_completer = Completer()
