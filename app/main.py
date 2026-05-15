@@ -100,15 +100,19 @@ def main():
 
                 else:
                     vars = declare_var.extract_values(arg)
-                    # print(f"\ncustom command: {vars}")
 
                     if len(vars) > 0:
                         executable = []
                         count = 0
 
                         for a in arg.split(" "):
+                            """
+                                Input might contain $ but it might be that 
+                                those variables are not declared.
+                            """
                             if "$" in a:
-                                executable.append(vars[count])
+                                if vars[count]:
+                                    executable.append(vars[count])
                                 count += 1
                             else:
                                 executable.append(a)

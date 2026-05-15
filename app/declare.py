@@ -37,16 +37,18 @@ class DeclareVariable:
                 if start_braces_idx > -1:
                     dec_key = inp[idx_var + 2 : ending_brace_idx]
 
-                val = self.declared_var_map.get(dec_key.strip())
+                val = self.declared_var_map.get(dec_key.strip(), "")
 
-                if idx_var > 0 and val:
+                if idx_var > 0:
                     val = inp[:idx_var] + val
 
-                if start_braces_idx > -1 and val:
+                if start_braces_idx > -1:
                     val = val + inp[ending_brace_idx + 1 :]
 
                 if val:
                     vars.append(val)
+                else:
+                    vars.append("")
 
         return vars
 
