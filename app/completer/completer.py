@@ -1,3 +1,4 @@
+import os
 import readline
 import subprocess
 
@@ -101,6 +102,10 @@ class Completer:
                             argv[3] — The word immediately before the word being completed. If there's no preceding word, pass an empty string.
                         """
                         args = []
+
+                        # set completion environment variables
+                        os.environ["COMP_LINE"] = line_buffer.strip()
+                        os.environ["COMP_POINT"] = str(len(line_buffer.strip()))
 
                         if len(command) == 3:
                             args = [command[0], command[-1], command[1]]
