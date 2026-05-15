@@ -25,6 +25,13 @@ def handle_echo(input: str) -> str:
     tokens = tokenize(args)
     output = ""
 
+    if "$" in input:
+        vars = declare_var.extract_values(input)
+
+        if len(vars) > 0:
+            output = " ".join(vars)
+        return output
+
     redirect_operator_found = [token in redirect_operators for token in tokens]
     append_operator_found = [token in append_operators for token in tokens]
 

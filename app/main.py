@@ -4,8 +4,6 @@
 import subprocess
 import readline
 
-from app.pipe import handle_piping
-
 
 from .tokenizer import tokenize
 from .utils import in_path, is_background_job
@@ -16,9 +14,12 @@ from .constant import (
     external_paths,
 )
 from .commands import handle_commands, handle_jobs
-from app.completer.completer import run_completer
 from .history import cmd_hist
 from .jobs import bg_job
+from .declare import declare_var
+
+from app.completer.completer import run_completer
+from app.pipe import handle_piping
 
 
 def main():
@@ -98,22 +99,38 @@ def main():
                             print(stdout, end="")
 
                 else:
-                    # Subprocess takes care of executables and os level binaries
-                    executable = tokenize(arg)
-                    fullpath, path_exist = in_path(executable[0], external_paths)
-                    operators = redirect_operators + append_operators
+                    vars = declare_var.extract_values(arg)
+                    # print(f"\ncustom command: {vars}")
 
-                    found_shell_operator = any(
-                        operator in executable for operator in operators
-                    )
+                    if len(vars) > 0:
+                        executable = []
+                        count = 0
 
-                    if found_shell_operator:
-                        # Let the shell handle, stdout, stdin operator
-                        subprocess.run(" ".join(executable), shell=True)
-                    elif path_exist:
+                        for a in arg.split(" "):
+                            if "$" in a:
+                                executable.append(vars[count])
+                                count += 1
+                            else:
+                                executable.append(a)
+
                         subprocess.run(executable)
                     else:
-                        print(f"{arg}: command not found")
+                        # Subprocess takes care of executables and os level binaries
+                        executable = tokenize(arg)
+                        fullpath, path_exist = in_path(executable[0], external_paths)
+                        operators = redirect_operators + append_operators
+
+                        found_shell_operator = any(
+                            operator in executable for operator in operators
+                        )
+
+                        if found_shell_operator:
+                            # Let the shell handle, stdout, stdin operator
+                            subprocess.run(" ".join(executable), shell=True)
+                        elif path_exist:
+                            subprocess.run(executable)
+                        else:
+                            print(f"{arg}: command not found")
 
             proc_cache = None
             prev_cmd_ouput = ""

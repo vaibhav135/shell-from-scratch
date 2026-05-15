@@ -1,14 +1,14 @@
 class DeclareVariable:
     def __init__(self):
-        self.declared_var_list = {}
+        self.declared_var_map = {}
 
     def add_var_declaration(self, declaration_string: str):
         declaration = declaration_string.split("=")
         if len(declaration) > 0:
-            self.declared_var_list[declaration[0].strip()] = declaration[1].strip()
+            self.declared_var_map[declaration[0].strip()] = declaration[1].strip()
 
     def get_var_declaration(self, dec_key: str) -> str:
-        dec_val = self.declared_var_list.get(dec_key)
+        dec_val = self.declared_var_map.get(dec_key)
         if dec_val:
             return f'{dec_key}="{dec_val}"'
         return ""
@@ -23,6 +23,23 @@ class DeclareVariable:
                 return False
 
         return True
+
+    def extract_values(self, input: str) -> list[str]:
+        vars = []
+        for inp in input.split(" "):
+            idx_var = inp.rfind("$")
+            if idx_var > -1:
+                var = inp[idx_var + 1 :]
+
+                val = self.declared_var_map.get(var.strip())
+
+                if idx_var > 0 and val:
+                    val = inp[:idx_var] + val
+
+                if val:
+                    vars.append(val)
+
+        return vars
 
 
 declare_var = DeclareVariable()
