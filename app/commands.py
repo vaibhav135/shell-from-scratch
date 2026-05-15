@@ -125,8 +125,11 @@ def handle_complete(input: str):
     if "-p" in input_list:
         found = False
         for hist in cmd_hist.get_all():
-            if "complete" in hist and "-a" in hist:
-                print(hist)
+            if "complete" in hist and "-C" in hist and input_list[-1] in hist:
+                complete_cmd = [h for h in hist.split(" ") if h]
+                print(
+                    f"{complete_cmd[0]} {complete_cmd[1].strip()} '{complete_cmd[2]}' {complete_cmd[3]}"
+                )
                 found = True
                 break
         if not found:
