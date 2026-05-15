@@ -136,6 +136,9 @@ def handle_complete(input: str):
     elif "-C" in input_list:
         filepath = input_list[2]
         cmd = input_list[-1]
+        args = [
+            input_list[-1],
+        ]
         run_completer.add_custom_completer_file_path(cmd, filepath)
 
 

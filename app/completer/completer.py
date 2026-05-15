@@ -9,7 +9,7 @@ class Completer:
     def __init__(self):
         self.initialize()
         # list of tuple (command, filepath)
-        self.custom_completer_filepath: list[tuple] = []
+        self.custom_completer_filepath = {}
         self.custom_completer = {}  # store list of completion candidates {"docker": ["run", "compose"] ...}
 
     def initialize(self):
@@ -18,20 +18,28 @@ class Completer:
         self.count = 0
 
     def add_custom_completer_file_path(self, cmd: str, filepath: str):
-        self.custom_completer_filepath.append((cmd, filepath))
+        self.custom_completer_filepath[cmd] = filepath
 
+    def get_custom_completer_candidates(self, cmd: str, args: list) -> list[str]:
+        filepath = self.custom_completer_filepath[cmd]
         exec = [filepath]
 
         if ".py" in filepath:
             exec = ["python3", filepath]
 
-        result = subprocess.run(exec, capture_output=True, text=True)
-        if result.stdout:
-            self.custom_completer[cmd] = [result.stdout.strip() + " "]
+        if len(args) == 3:
+            exec.extend(args)
 
-    def get_custom_completer_candidates(self, cmd: str) -> list[str]:
-        completer_candidates = self.custom_completer.get(cmd)
-        return completer_candidates if completer_candidates else []
+        result = subprocess.run(exec, capture_output=True, text=True)
+        completer_candidates = []
+
+        if result.stdout:
+            # self.custom_completer[cmd] = [result.stdout.strip() + " "]
+            # completer_candidates = self.custom_completer.get(cmd)
+
+            completer_candidates = [result.stdout.strip() + " "]
+
+        return completer_candidates
 
     # Text will be empty or missing till, if it contains any of these delimiters  `~!@#$%^&*()-=+[{]}\|;:'",<>/?
     def completer(self, text: str, state: int) -> str | None:
@@ -85,11 +93,25 @@ class Completer:
 
                     if any(
                         command[0].strip() == custom_completion_cmd
-                        for custom_completion_cmd in self.custom_completer.keys()
+                        for custom_completion_cmd in self.custom_completer_filepath.keys()
                     ):
+                        """
+                            argv[1] — The command name being completed (e.g., git)
+                            argv[2] — The word currently being completed (the partial text at the cursor)
+                            argv[3] — The word immediately before the word being completed. If there's no preceding word, pass an empty string.
+                        """
+                        args = []
+
+                        if len(command) == 3:
+                            args = [command[0], command[-1], command[1]]
                         self.matches = self.get_custom_completer_candidates(
-                            command[0].strip()
+                            command[0].strip(), args
                         )
+
+                        if len(self.matches) == 0:
+                            # ring bell for empty matches
+                            print("\x07")
+                            return None
                     else:
                         completion_type = get_completion_type(line_buffer)
                         self.matches = get_matches(command, text, completion_type)
