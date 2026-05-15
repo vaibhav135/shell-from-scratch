@@ -138,6 +138,13 @@ def handle_complete(input: str):
         completer.remove_custom_completion_filepath(cmd)
 
 
+def handle_declare(input: str):
+    input_list = [inp.strip() for inp in input.split(" ") if inp]
+
+    if "-p" in input_list:
+        print(f"{input_list[0]} -- {input_list[-1]}")
+
+
 def handle_commands(input: str) -> str:
 
     output = ""
@@ -156,5 +163,7 @@ def handle_commands(input: str) -> str:
         handle_history(input)
     elif input.startswith("complete"):
         handle_complete(input)
+    elif input.startswith("declare"):
+        handle_declare(input)
 
     return output
