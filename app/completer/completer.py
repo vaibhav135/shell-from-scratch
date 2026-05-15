@@ -11,7 +11,7 @@ class Completer:
         self.initialize()
         # list of tuple (command, filepath)
         self.custom_completer_filepath = {}
-        self.custom_completer = {}  # store list of completion candidates {"docker": ["run", "compose"] ...}
+        # self.custom_completer = {}  # store list of completion candidates {"docker": ["run", "compose"] ...}
 
     def initialize(self):
         self.matches = []
@@ -43,6 +43,9 @@ class Completer:
             ]
 
         return completer_candidates
+
+    def remove_custom_completion_filepath(self, cmd):
+        del self.custom_completer_filepath[cmd]
 
     # Text will be empty or missing till, if it contains any of these delimiters  `~!@#$%^&*()-=+[{]}\|;:'",<>/?
     def completer(self, text: str, state: int) -> str | None:

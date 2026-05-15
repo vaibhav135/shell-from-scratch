@@ -14,7 +14,7 @@ from .constant import (
 )
 from .jobs import bg_job
 from .history import cmd_hist
-from app.completer.completer import run_completer
+from app.completer.completer import run_completer as completer
 
 
 def handle_echo(input: str) -> str:
@@ -122,24 +122,20 @@ def handle_history(input: str):
 
 def handle_complete(input: str):
     input_list = [inp.strip() for inp in input.split(" ") if inp]
+    cmd = input_list[-1]
 
     if "-p" in input_list:
-        found = False
-        for hist in cmd_hist.get_all():
-            if "complete" in hist and "-C" in hist and input_list[-1] in hist:
-                complete_cmd = [h for h in hist.split(" ") if h]
-                print(f"complete -C '{complete_cmd[2]}' {complete_cmd[3]}")
-                found = True
-                break
-        if not found:
+        filepath = completer.custom_completer_filepath.get(cmd)
+        if filepath:
+            # complete_cmd = [h for h in hist.split(" ") if h]
+            print(f"complete -C '{filepath}' {cmd}")
+        else:
             print(f"complete: {input_list[-1]}: no completion specification")
     elif "-C" in input_list:
         filepath = input_list[2]
-        cmd = input_list[-1]
-        args = [
-            input_list[-1],
-        ]
-        run_completer.add_custom_completer_file_path(cmd, filepath)
+        completer.add_custom_completer_file_path(cmd, filepath)
+    elif "-r" in input_list:
+        completer.remove_custom_completion_filepath(cmd)
 
 
 def handle_commands(input: str) -> str:
