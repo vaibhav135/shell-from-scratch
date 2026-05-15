@@ -29,21 +29,21 @@ class DeclareVariable:
         for inp in input.split(" "):
             idx_var = inp.rfind("$")
             if idx_var > -1:
-                # extracting the key from the string
-                dec_key = inp[idx_var + 1 :]
+                var = inp[idx_var + 1 :]
 
                 start_braces_idx = inp.rfind("{")
-                ending_brace_idx = inp.rfind("}")
+                        ending_brace_idx = inp.rfind("}")
                 if start_braces_idx > -1:
-                    dec_key = inp[idx_var + 2 : ending_brace_idx]
+                    var = inp[idx_var + 2 : len(inp) - 1]
 
-                val = self.declared_var_map.get(dec_key.strip())
+                val = self.declared_var_map.get(var.strip())
 
                 if idx_var > 0 and val:
                     val = inp[:idx_var] + val
 
-                if start_braces_idx > -1 and val:
-                    val = val + inp[ending_brace_idx + 1 :]
+                    if start_braces_idx > -1:
+                        val = val + inp[ending_brace_idx:]
+                        print("")
 
                 if val:
                     vars.append(val)
