@@ -16,7 +16,7 @@ from .constant import (
     external_paths,
 )
 from .commands import handle_commands, handle_jobs
-from app.completer.completer import outer_completer
+from app.completer.completer import run_completer
 from .history import cmd_hist
 from .jobs import bg_job
 
@@ -28,7 +28,7 @@ def main():
     )
 
     readline.parse_and_bind(autocomplete_cmd_bind)
-    readline.set_completer(outer_completer())
+    readline.set_completer(run_completer.completer)
 
     while True:
         """

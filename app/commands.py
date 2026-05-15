@@ -14,6 +14,7 @@ from .constant import (
 )
 from .jobs import bg_job
 from .history import cmd_hist
+from app.completer.completer import run_completer as completer
 
 
 def handle_echo(input: str) -> str:
@@ -96,7 +97,7 @@ def handle_jobs(auto_reaping=False):
 
 
 def handle_history(input: str):
-    input_list = input.split(" ")
+    input_list = [inp.strip() for inp in input.split(" ") if inp]
 
     if "-r" in input_list:
         cmd_hist.append_from_file(input_list[-1])
@@ -105,7 +106,7 @@ def handle_history(input: str):
         cmd_hist.append_to_file(input_list[-1], "-a" in input_list)
         return
 
-    n = int(input_list[-1].strip()) if len(input_list) > 1 else -1
+    n = int(input_list[-1]) if len(input_list) > 1 else -1
 
     hist = cmd_hist.get_all()
     idx = 0
@@ -119,7 +120,26 @@ def handle_history(input: str):
         idx += 1
 
 
+def handle_complete(input: str):
+    input_list = [inp.strip() for inp in input.split(" ") if inp]
+    cmd = input_list[-1]
+
+    if "-p" in input_list:
+        filepath = completer.custom_completer_filepath.get(cmd)
+        if filepath:
+            # complete_cmd = [h for h in hist.split(" ") if h]
+            print(f"complete -C '{filepath}' {cmd}")
+        else:
+            print(f"complete: {input_list[-1]}: no completion specification")
+    elif "-C" in input_list:
+        filepath = input_list[2]
+        completer.add_custom_completer_file_path(cmd, filepath)
+    elif "-r" in input_list:
+        completer.remove_custom_completion_filepath(cmd)
+
+
 def handle_commands(input: str) -> str:
+
     output = ""
 
     if input.startswith("echo"):
@@ -134,5 +154,7 @@ def handle_commands(input: str) -> str:
         output = handle_type(input)
     elif input.startswith("history"):
         handle_history(input)
+    elif input.startswith("complete"):
+        handle_complete(input)
 
     return output

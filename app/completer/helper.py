@@ -57,6 +57,7 @@ def get_matches(
     if len(command) > 1:
         args = command[1]
 
+    # default completion list
     completion_list = get_completion_list(args if args else text, completion_type)
 
     find_exact_matches = True
